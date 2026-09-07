@@ -7,34 +7,48 @@ const DOMAINS = [
   'science', 'sports', 'technology', 'weather'
 ];
 
+// Clean API Base URL formatting (removes trailing slash if present)
 const RAW_API_URL = import.meta.env.VITE_API_URL || 'https://project-ideas-backend-w0r3.onrender.com';
 const API_BASE_URL = RAW_API_URL.replace(/\/+$/, '');
 
-const fetchIdeas = async () => {
-  setLoading(true);
-  try {
-    // This now cleanly formats as: https://your-backend.onrender.com/api/problems
-    const res = await fetch(
-      `${API_BASE_URL}api/problems?page=${page}&limit=6&domain=${selectedDomain}`
-    );
+export default function App() {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDomain, setSelectedDomain] = useState('all');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-    const contentType = res.headers.get("content-type");
-    if (!res.ok || !contentType || !contentType.includes("application/json")) {
-      const errorText = await res.text();
-      console.error("Non-JSON API Response received:", errorText);
-      setProjects([]);
-      return;
-    }
+  useEffect(() => {
+    fetchIdeas();
+  }, [page, selectedDomain]);
 
-    const result = await res.json();
-    if (result.success) {
-      setProjects(result.data);
-      setTotalPages(result.pagination?.totalPages || result.pagination?.pages || 1);
+  const fetchIdeas = async () => {
+    setLoading(true);
+    try {
+      // Corrected API URL with slash: `${API_BASE_URL}/api/problems...`
+      const res = await fetch(
+        `${API_BASE_URL}/api/problems?page=${page}&limit=6&domain=${selectedDomain}`
+      );
+
+      const contentType = res.headers.get("content-type");
+      if (!res.ok || !contentType || !contentType.includes("application/json")) {
+        const errorText = await res.text();
+        console.error("Non-JSON API Response received:", errorText);
+        setProjects([]);
+        return;
+      }
+
+      const result = await res.json();
+      if (result.success) {
+        setProjects(result.data);
+        setTotalPages(result.pagination?.totalPages || result.pagination?.pages || 1);
+      }
+    } catch (err) {
+      console.error("Error fetching ideas:", err);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error("Error fetching ideas:", err);
-  } finally {
-    setLoading(false);
+  };
 
   const handleDomainChange = (domain) => {
     setSelectedDomain(domain);
@@ -45,7 +59,7 @@ const fetchIdeas = async () => {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">
-          💥Project Ideas Generator
+          💥 Project Ideas Generator
         </h1>
 
         {/* Domain Filter Buttons */}
@@ -103,8 +117,6 @@ const fetchIdeas = async () => {
                     </ul>
                   </div>
                 </div>
-
-                
               </div>
             ))}
           </div>
