@@ -15,7 +15,7 @@ const fetchIdeas = async () => {
   try {
     // This now cleanly formats as: https://your-backend.onrender.com/api/problems
     const res = await fetch(
-      `${API_BASE_URL}/api/problems?page=${page}&limit=6&domain=${selectedDomain}`
+      `${API_BASE_URL}api/problems?page=${page}&limit=6&domain=${selectedDomain}`
     );
 
     const contentType = res.headers.get("content-type");
