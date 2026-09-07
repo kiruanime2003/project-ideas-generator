@@ -2,7 +2,7 @@
 require('dotenv').config();
 const connectDB = require('../config/db');
 // Verify path steps up to jobs/cronIngestion
-const { runBatchIngestion } = require('../jobs/cronIngestion');
+const { runBatchIngestion } = require('../jobs/cron_ingestion');
 
 async function runTest() {
   try {

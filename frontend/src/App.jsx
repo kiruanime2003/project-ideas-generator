@@ -43,10 +43,10 @@ export default function App() {
       <header className="max-w-7xl mx-auto mb-10 border-b border-slate-800 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-amber-400">
-            Project Idea Discovery
+            Project Ideas Generator
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Transforming real-world news into structured software portfolio projects
+            Find new project ideas based on industry news
           </p>
         </div>
 

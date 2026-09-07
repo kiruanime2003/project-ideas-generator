@@ -3,21 +3,25 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
-const problemRoutes = require('./routes/problem_routes');
+const { startCronJob } = require('./jobs/cron_ingestion'); // Import the cron manager
+const projectRoutes = require('./routes/project_routes');
 
 const app = express();
 
-// Connect to MongoDB
-connectDB();
-
-// Middleware
-app.use(cors()); // Allows React frontend to communicate with backend
+app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/api/problems', problemRoutes);
+app.use('/api/projects', projectRoutes);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+
+// Connect Database & Start Server
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    
+    // Start automated RSS batch ingestion cron schedules
+    startCronJob();
+  });
 });

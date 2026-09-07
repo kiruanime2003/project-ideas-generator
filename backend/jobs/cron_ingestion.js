@@ -5,7 +5,7 @@ const ProblemIdea = require('../models/problem_idea');
 const { fetchLatestNews } = require('../services/news_service');
 const { generateProjectIdea } = require('../services/llm_service');
 
-const TARGET_IDEAS_PER_BATCH = 5;
+const TARGET_IDEAS_PER_BATCH = 10;
 
 async function runBatchIngestion(isMorningRun = false) {
   console.log(`\n==================================================`);
@@ -77,3 +77,4 @@ module.exports = {
   startCronJob, 
   runBatchIngestion 
 };
+
