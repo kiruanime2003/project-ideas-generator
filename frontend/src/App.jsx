@@ -7,7 +7,7 @@ const DOMAINS = [
   'science', 'sports', 'technology', 'weather'
 ];
 
-const RAW_API_URL = import.meta.env.VITE_API_URL || 'https://project-ideas-backend-w0r3.onrender.com/';
+const RAW_API_URL = import.meta.env.VITE_API_URL || 'https://project-ideas-backend-w0r3.onrender.com';
 const API_BASE_URL = RAW_API_URL.replace(/\/+$/, '');
 
 const fetchIdeas = async () => {
