@@ -67,6 +67,11 @@ async function runBatchIngestion(isMorningRun = false) {
 }
 
 function startCronJob() {
+  const cronOptions = {
+    scheduled: true,
+    timezone: "Asia/Kolkata" // 👈 Forces schedule to India Standard Time (IST)
+  };
+
   cron.schedule('0 6 * * *', () => runBatchIngestion(true));
   cron.schedule('0 18 * * *', () => runBatchIngestion(false));
   console.log('⏰ Cron tasks scheduled for 06:00 AM & 06:00 PM.');
