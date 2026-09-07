@@ -4,7 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const { startCronJob } = require('./jobs/cron_ingestion'); // Import the cron manager
-const projectRoutes = require('./routes/project_routes');
+const projectRoutes = require('./routes/problem_routes');
 
 const app = express();
 
