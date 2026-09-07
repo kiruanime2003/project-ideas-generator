@@ -7,50 +7,34 @@ const DOMAINS = [
   'science', 'sports', 'technology', 'weather'
 ];
 
-// Fallback to localhost if environment variable is not defined
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const RAW_API_URL = import.meta.env.VITE_API_URL || 'https://project-ideas-backend-w0r3.onrender.com/';
+const API_BASE_URL = RAW_API_URL.replace(/\/+$/, '');
 
-export default function App() {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedDomain, setSelectedDomain] = useState('all');
-  
-  // 👈 Declaration of page & totalPages state variables
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+const fetchIdeas = async () => {
+  setLoading(true);
+  try {
+    // This now cleanly formats as: https://your-backend.onrender.com/api/problems
+    const res = await fetch(
+      `${API_BASE_URL}/api/problems?page=${page}&limit=6&domain=${selectedDomain}`
+    );
 
-  useEffect(() => {
-    fetchIdeas();
-  }, [page, selectedDomain]);
-
-  const fetchIdeas = async () => {
-    setLoading(true);
-    try {
-      // 👈 Endpoint updated to /api/problems to match backend route
-      const res = await fetch(
-        `${API_BASE_URL}/api/problems?page=${page}&limit=6&domain=${selectedDomain}`
-      );
-      
-      const contentType = res.headers.get("content-type");
-      if (!res.ok || !contentType || !contentType.includes("application/json")) {
-        const errorText = await res.text();
-        console.error("Non-JSON API Response received:", errorText);
-        setProjects([]);
-        return;
-      }
-
-      const result = await res.json();
-      
-      if (result.success) {
-        setProjects(result.data);
-        setTotalPages(result.pagination?.totalPages || result.pagination?.pages || 1);
-      }
-    } catch (err) {
-      console.error("Error fetching ideas:", err);
-    } finally {
-      setLoading(false);
+    const contentType = res.headers.get("content-type");
+    if (!res.ok || !contentType || !contentType.includes("application/json")) {
+      const errorText = await res.text();
+      console.error("Non-JSON API Response received:", errorText);
+      setProjects([]);
+      return;
     }
-  };
+
+    const result = await res.json();
+    if (result.success) {
+      setProjects(result.data);
+      setTotalPages(result.pagination?.totalPages || result.pagination?.pages || 1);
+    }
+  } catch (err) {
+    console.error("Error fetching ideas:", err);
+  } finally {
+    setLoading(false);
 
   const handleDomainChange = (domain) => {
     setSelectedDomain(domain);
