@@ -61,7 +61,7 @@ export default function App() {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">
-          💡 Project Idea Discovery
+          💥Project Ideas Generator
         </h1>
 
         {/* Domain Filter Buttons */}
@@ -104,7 +104,7 @@ export default function App() {
                   <h2 className="text-lg font-bold text-gray-900 mt-3 leading-snug">
                     {project.title}
                   </h2>
-                  <p className="text-gray-600 text-sm mt-2 line-clamp-3">
+                  <p className="text-gray-600 text-sm mt-2">
                     {project.problemStatement}
                   </p>
 
@@ -120,16 +120,7 @@ export default function App() {
                   </div>
                 </div>
 
-                {project.articleUrl && (
-                  <a
-                    href={project.articleUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block mt-4 text-xs font-semibold text-blue-600 hover:underline"
-                  >
-                    Read Source Article →
-                  </a>
-                )}
+                
               </div>
             ))}
           </div>

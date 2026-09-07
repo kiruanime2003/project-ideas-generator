@@ -23,7 +23,7 @@ function buildPrompt(newsTitle, newsSnippet) {
     1. Extract an operational or technical friction point from the news.
     2. Transform that friction point into a realistic software portfolio project idea.
     3. Categorize the project into EXACTLY ONE of these domains: ${ALLOWED_DOMAINS.join(', ')}.
-    4. Provide coreFeatures: Exactly 4 distinct, production-ready software features needed to implement this application.
+    4. Provide coreFeatures: Exactly 4 functionalities without using jargons in simple terms.
   `;
 }
 
