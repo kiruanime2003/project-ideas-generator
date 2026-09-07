@@ -18,7 +18,7 @@ async function runPipeline() {
 
   console.log(`Fetched ${newsList.length} articles. Processing first 2 articles...\n`);
 
-  for (const article of newsList.slice(0, 2)) {
+  for (const article of newsList) {
     console.log(`--------------------------------------------------`);
     console.log(`📰 Article: "${article.title}"`);
 
