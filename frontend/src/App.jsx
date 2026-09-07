@@ -1,149 +1,164 @@
 // frontend/src/App.jsx
 import React, { useState, useEffect } from 'react';
 
-export default function App() {
-  const [ideas, setIdeas] = useState([]);
-  const [selectedDomain, setSelectedDomain] = useState('All');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
+const DOMAINS = [
+  'all', 'business', 'crime', 'culture', 'education', 
+  'entertainment', 'environment', 'health', 'politics', 
+  'science', 'sports', 'technology', 'weather'
+];
 
-  const DOMAINS = [
-    'business', 'crime', 'culture', 'education', 
-    'entertainment', 'environment', 'health', 'politics', 
-    'science', 'sports', 'technology', 'weather'
-  ];
+// Fallback to localhost if environment variable is not defined
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+export default function App() {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDomain, setSelectedDomain] = useState('all');
+  
+  // 👈 Declaration of page & totalPages state variables
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    const fetchIdeas = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`http://localhost:5000/api/problems?page=${page}&limit=6&domain=${selectedDomain}`);
-        const result = await response.json();
-        
-        if (result.success) {
-          setIdeas(result.data);
-          setTotalPages(result.pagination.pages);
-        }
-      } catch (error) {
-        console.error('Error fetching ideas:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchIdeas();
-  }, [selectedDomain, currentPage]);
+  }, [page, selectedDomain]);
+
+  const fetchIdeas = async () => {
+    setLoading(true);
+    try {
+      // 👈 Endpoint updated to /api/problems to match backend route
+      const res = await fetch(
+        `${API_BASE_URL}/api/problems?page=${page}&limit=6&domain=${selectedDomain}`
+      );
+      
+      const contentType = res.headers.get("content-type");
+      if (!res.ok || !contentType || !contentType.includes("application/json")) {
+        const errorText = await res.text();
+        console.error("Non-JSON API Response received:", errorText);
+        setProjects([]);
+        return;
+      }
+
+      const result = await res.json();
+      
+      if (result.success) {
+        setProjects(result.data);
+        setTotalPages(result.pagination?.totalPages || result.pagination?.pages || 1);
+      }
+    } catch (err) {
+      console.error("Error fetching ideas:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDomainChange = (domain) => {
+    setSelectedDomain(domain);
+    setPage(1); // Reset to page 1 on category change
+  };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-slate-100 p-8">
-      {/* Header Section */}
-      <header className="max-w-7xl mx-auto mb-10 border-b border-slate-800 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-amber-400">
-            Project Ideas Generator
-          </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Find new project ideas based on industry news
-          </p>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-800 mb-6">
+          💡 Project Idea Discovery
+        </h1>
+
+        {/* Domain Filter Buttons */}
+        <div className="flex flex-wrap gap-2 mb-8">
+          {DOMAINS.map((domain) => (
+            <button
+              key={domain}
+              onClick={() => handleDomainChange(domain)}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold capitalize transition ${
+                selectedDomain === domain
+                  ? 'bg-blue-600 text-white shadow'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-100'
+              }`}
+            >
+              {domain}
+            </button>
+          ))}
         </div>
 
-        {/* Domain Filter Dropdown */}
-        <select
-          value={selectedDomain}
-          onChange={(e) => {
-            setSelectedDomain(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-lg px-4 py-2 focus:border-amber-400 focus:outline-none capitalize cursor-pointer self-start md:self-auto"
-        >
-          <option value="All">All Domains</option>
-          {DOMAINS.map((domain) => (
-            <option key={domain} value={domain}>
-              {domain}
-            </option>
-          ))}
-        </select>
-      </header>
-
-      {/* Main Grid */}
-      <main className="max-w-7xl mx-auto">
+        {/* Project Cards Grid */}
         {loading ? (
-          <div className="text-center py-20 text-slate-400 font-medium">
-            Loading project briefs...
+          <div className="text-center py-12 text-gray-500 font-medium">
+            Loading fresh project ideas...
           </div>
-        ) : ideas.length === 0 ? (
-          <div className="text-center py-20 text-slate-400 font-medium">
-            No projects found for this domain.
+        ) : projects.length === 0 ? (
+          <div className="text-center py-12 text-gray-500">
+            No projects found for this domain filter.
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {ideas.map((idea) => (
-              <div
-                key={idea._id}
-                className="bg-slate-800/80 border border-slate-700/70 rounded-xl p-6 flex flex-col justify-between shadow-lg hover:border-slate-600 transition-all"
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {projects.map((project) => (
+              <div 
+                key={project._id} 
+                className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between"
               >
                 <div>
-                  {/* Category Badge */}
-                  <span className="inline-block text-[11px] font-bold uppercase tracking-wider text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-md mb-3">
-                    {idea.domain}
+                  <span className="text-xs font-semibold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md uppercase tracking-wider">
+                    {project.domain}
                   </span>
-
-                  {/* Title */}
-                  <h2 className="text-xl font-bold text-white mb-3 leading-snug">
-                    {idea.title}
+                  <h2 className="text-lg font-bold text-gray-900 mt-3 leading-snug">
+                    {project.title}
                   </h2>
-
-                  <hr className="border-slate-700/60 my-3" />
-
-                  {/* Problem Statement */}
-                  <p className="text-sm text-slate-300 leading-relaxed mb-4">
-                    {idea.problemStatement}
+                  <p className="text-gray-600 text-sm mt-2 line-clamp-3">
+                    {project.problemStatement}
                   </p>
 
-                  <hr className="border-slate-700/60 my-4" />
-
-                  {/* Core Features Section */}
-                  <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-                    Core Features:
-                  </h3>
-                  <ul className="space-y-2 text-sm text-slate-300">
-                    {idea.coreFeatures.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <span className="text-amber-400 font-bold">•</span>
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="mt-4 pt-3 border-t border-gray-100">
+                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                      Core Features
+                    </h4>
+                    <ul className="text-xs text-gray-700 space-y-1.5 list-disc list-inside">
+                      {project.coreFeatures && project.coreFeatures.map((feature, i) => (
+                        <li key={i}>{feature}</li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
+
+                {project.articleUrl && (
+                  <a
+                    href={project.articleUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block mt-4 text-xs font-semibold text-blue-600 hover:underline"
+                  >
+                    Read Source Article →
+                  </a>
+                )}
               </div>
             ))}
           </div>
         )}
 
         {/* Pagination Controls */}
-        {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-4 mt-12 border-t border-slate-800 pt-6">
-            <button
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => p - 1)}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-            >
-              Previous
-            </button>
-            <span className="text-sm text-slate-400 font-medium">
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => p + 1)}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-            >
-              Next
-            </button>
-          </div>
-        )}
-      </main>
+        <div className="flex items-center justify-between mt-10 pt-4 border-t border-gray-200">
+          <button
+            disabled={page === 1 || loading}
+            onClick={() => setPage((prev) => prev - 1)}
+            className="px-4 py-2 text-sm font-medium bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            ← Previous
+          </button>
+
+          <span className="text-sm font-medium text-gray-600">
+            Page <span className="font-bold text-gray-900">{page}</span> of{' '}
+            <span className="font-bold text-gray-900">{totalPages || 1}</span>
+          </span>
+
+          <button
+            disabled={page >= totalPages || loading}
+            onClick={() => setPage((prev) => prev + 1)}
+            className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg shadow-sm hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Next →
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
