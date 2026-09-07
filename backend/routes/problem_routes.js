@@ -13,8 +13,8 @@ router.get('/', async (req, res) => {
 
     // Filter query
     const query = {};
-    if (domain && domain !== 'All') {
-      query.domain = domain.toLowerCase();
+    if (domain && domain.toLowerCase() !== 'all') {
+      query.domain = { $regex: new RegExp(`^${domain}$`, 'i') }; // Case-insensitive regex match
     }
 
     const total = await ProblemIdea.countDocuments(query);
@@ -29,7 +29,8 @@ router.get('/', async (req, res) => {
       pagination: {
         total,
         page,
-        pages: Math.ceil(total / limit)
+        pages: Math.ceil(total / limit),
+        totalPages: Math.ceil(total / limit) || 1
       }
     });
   } catch (error) {

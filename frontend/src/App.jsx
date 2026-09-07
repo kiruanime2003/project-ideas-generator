@@ -18,9 +18,7 @@ export default function App() {
     const fetchIdeas = async () => {
       setLoading(true);
       try {
-        const response = await fetch(
-          `http://localhost:5000/api/problems?domain=${selectedDomain}&page=${currentPage}&limit=6`
-        );
+        const response = await fetch(`http://localhost:5000/api/problems?page=${page}&limit=6&domain=${selectedDomain}`);
         const result = await response.json();
         
         if (result.success) {
