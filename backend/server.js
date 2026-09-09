@@ -12,6 +12,29 @@ const problemRoutes = require('./routes/problem_routes'); // Verify path to prob
 
 const app = express();
 
+// backend/server.js
+const { runBatchIngestion } = require('./jobs/cronIngestion');
+
+// External cron trigger endpoint
+app.get('/api/cron/trigger', async (req, res) => {
+  // Simple secret key protection so random users can't trigger it
+  const secret = req.query.secret;
+  if (secret !== process.env.CRON_SECRET) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+
+  const mode = req.query.mode; // 'morning' or 'evening'
+  const isMorning = mode === 'morning';
+
+  // Trigger ingestion asynchronously
+  runBatchIngestion(isMorning);
+
+  return res.status(200).json({
+    success: true,
+    message: `Triggered ${isMorning ? 'MORNING' : 'EVENING'} batch ingestion.`
+  });
+});
+
 app.use(cors());
 app.use(express.json());
 
